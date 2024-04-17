@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>井字棋</title>
+  <style>
+    h1 {
+      text-align: center;
+    }
+    .board {
+      display: table;
+      margin: 0 auto;
+    }
+    .row {
+      display: table-row;
+    }
+    .cell {
+      display: table-cell;
+      width: 80px;
+      height: 80px;
+      border: 1px solid #000;
+      font-size: 48px;
+      text-align: center;
+      vertical-align: middle;
+      cursor: pointer;
+    }
+    .cell.x {
+      color: red;
+    }
+    .cell.o {
+      color: blue;
+    }
+    .cell:hover {
+      background-color: #eee;
+    }
+    .message {
+      font-size: 24px;
+      margin-top: 16px;
+      text-align: center;
+    }
+    .restart-button {
+      display: block;
+      margin: 16px auto;
+      padding: 8px 16px;
+      font-size: 16px;
+      background: #eee;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>井字棋游戏</h1>
+  <div class="board">
+    <div class="row">
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+    </div>
+    <div class="row">
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+    </div>
+    <div class="row">
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+    </div>
+  </div>
+  <div class="message"></div>
+  <button class="restart-button">再来一局</button>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const board = document.querySelector('.board');
+      const message = document.querySelector('.message');
+      const cells = Array.from(document.querySelectorAll('.cell'));
+      const restartButton = document.querySelector('.restart-button');
+
+      let currentPlayer = 'X';
+      let gameOver = false;
+
+      // 点击格子
+      function handleCellClick(event) {
+        const cell = event.target;
+
+        if (cell.textContent === '' && !gameOver) {
+          cell.textContent = currentPlayer;
+          cell.classList.add(currentPlayer === 'X' ? 'x' : 'o');
+
+          // 检查哪方获胜
+          if (checkWin()) {
+            gameOver = true;
+            message.textContent = `玩家 ${currentPlayer} 获胜!`;
+          } else if (checkDraw()) {
+            gameOver = true;
+            message.textContent = "平局!";
+          } else {
+            currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+          }
+        }
+      }
+
+      function checkWin() {
+        const winningCombinations = [
+          [0, 1, 2], [3, 4, 5], [6, 7, 8], // 行
+          [0, 3, 6], [1, 4, 7], [2, 5, 8], // 列
+          [0, 4, 8], [2, 4, 6] // 对角
+        ];
+        return winningCombinations.some(combination => {
+          const [a, b, c] = combination;
+          return (
+            cells[a].textContent &&
+            cells[a].textContent === cells[b].textContent &&
+            cells[a].textContent === cells[c].textContent
+          );
+        })
+      }
+      function checkDraw() {
+        return cells.every(cell => cell.textContent);
+      }
+
+      function restartGame() {
+        cells.forEach(cell => {
+          cell.textContent = '';
+          cell.classList.remove('x', 'o');
+        })
+        currentPlayer = 'X';
+        gameOver = false;
+        message.textContent = '';
+      }
+
+      cells.forEach(cell => {
+        cell.addEventListener('click', handleCellClick);
+      })
+
+      restartButton.addEventListener('click', restartGame);
+    })
+  </script>
+</body>
+</html>
