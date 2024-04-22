@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>汉诺塔游戏</title>
+  <style>
+    .tower {
+      position: relative;
+      display: inline-block;
+      width: 200px;
+      height: 300px;
+      border: 1px solid #000;
+      margin: 20px;
+    }
+    .disk {
+      position: absolute;
+      width: 100%;
+      height: 20px;
+      background-color: #00f;
+      border-radius: 10px;
+      transition: left 0.5s, bottom 0.5s; /* 添加 bottom 过渡效果 */
+    }
+    .selected {
+      background-color: #f00; /* 添加选中状态的颜色 */
+    }
+    #steps {
+      margin-top: 10px;
+    }
+    #message {
+      margin-top: 10px;
+    }
+    #restart-button {
+      display: block;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>汉诺塔游戏</h1>
+  <div class="tower" id="tower1"></div>
+  <div class="tower" id="tower2"></div>
+  <div class="tower" id="tower3"></div>
+  <p id="steps">步数: 0</p>
+  <p id="message"></p>
+  <button id="restart-button">重新开始</button>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      var numDisks = 3;
+      var diskHeight = 20;
+      var towerHeight = 300;
+      var towerWidth = 200;
+      var towerPadding = 20;
+      var selectedDisk = null;
+      var towers = document.querySelectorAll('.tower');
+      var steps = 0;
+
+      towers.forEach(function(tower) {
+        tower.addEventListener('click', function() {
+          var currentTower = this;
+
+          if (selectedDisk === null) {
+            var topDisk = currentTower.querySelector('.disk');
+            if (!topDisk) {
+              return; // 当前柱子上没有盘子可选
+            }
+            selectedDisk = topDisk;
+            selectedDisk.classList.add('selected');
+          } else {
+            var targetTower = currentTower;
+            var targetDisk = currentTower.querySelector('.disk');
+            if (!targetDisk || targetDisk.offsetWidth > selectedDisk.offsetWidth) {
+              targetTower.insertBefore(selectedDisk, targetTower.firstChild);
+              selectedDisk.classList.remove('selected');
+              selectedDisk = null;
+              steps++;
+              document.getElementById('steps').innerText = '步数: ' + steps;
+            } else {
+              selectedDisk.classList.remove('selected'); // 清除选中状态
+              selectedDisk = targetDisk; // 设置为最上面的盘子
+              selectedDisk.classList.add('selected'); // 添加选中状态
+              return; // 无效移动，目标柱子上有更小的盘子
+            }
+          }
+
+          updateDiskPositions();
+          checkGameCompletion();
+        });
+      });
+
+      // 初始化游戏
+      function initGame() {
+        resetGame();
+        createDisks();
+        updateDiskPositions();
+      }
+
+      // 创建盘子
+      function createDisks() {
+        var tower1 = document.getElementById('tower1');
+        for (var i = numDisks; i > 0; i--) {
+          var diskWidth = i * 40;
+          var diskLeft = (towerWidth - diskWidth) / 2;
+          var disk = document.createElement('div');
+          disk.className = 'disk';
+          disk.style.width = diskWidth + 'px';
+          disk.style.left = diskLeft + 'px';
+          tower1.insertBefore(disk, tower1.firstChild);
+        }
+      }
+
+      // 重置游戏
+      function resetGame() {
+        towers.forEach(function(tower) {
+          tower.innerHTML = '';
+        });
+        steps = 0;
+        document.getElementById('steps').innerText = '步数: 0';
+        document.getElementById('message').innerText = '';
+      }
+
+      // 更新盘子位置
+      function updateDiskPositions() {
+        towers.forEach(function(tower) {
+          var disks = tower.querySelectorAll('.disk');
+          var numDisks = disks.length;
+          disks.forEach(function(disk, index) {
+            var bottom = (numDisks - 1 - index) * diskHeight;
+            disk.style.bottom = bottom + 'px';
+          });
+        });
+      }
+
+      // 检查游戏完成情况
+      function checkGameCompletion() {
+        if (document.getElementById('tower3').querySelectorAll('.disk').length === numDisks) {
+          document.getElementById('message').innerText = '游戏完成！难度升级！';
+          setTimeout(function() {
+            increaseDifficulty();
+          }, 1000);
+        }
+      }
+
+      // 自动增加难度
+      function increaseDifficulty() {
+        numDisks++;
+        initGame();
+      }
+
+      // 初始化游戏
+      initGame();
+
+      // 重新开始按钮事件处理
+      document.getElementById('restart-button').addEventListener('click', function() {
+        initGame();
+      });
+    });
+  </script>
+</body>
+</html>
