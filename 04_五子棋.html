@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>五子棋游戏</title>
+  <style>
+    #board {
+      width: 400px;
+      height: 400px;
+      border: 1px solid #000;
+      display: flex;
+      flex-wrap: wrap;
+      background: #eee;
+    }
+
+    .intersection {
+      width: calc(100% / 15);
+      height: calc(100% / 15);
+      border: 1px solid #000;
+      box-sizing: border-box;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .stone {
+      width: 80%;
+      height: 80%;
+      border-radius: 50%;
+      pointer-events: none;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .black {
+      background-color: #000;
+    }
+
+    .white {
+      background-color: #fff;
+    }
+
+    #nextMove {
+      margin-top: 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>五子棋游戏</h1>
+  <div id="nextMove">下一步：黑子</div>
+  <div id="board"></div>
+
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      const board = document.getElementById('board');
+      const nextMove = document.getElementById('nextMove');
+      const intersections = [];
+      const size = 15; // 棋盘大小
+      let currentPlayer = 'black'; // 当前玩家
+
+      // 创建棋盘交叉点
+      for (let i = 0; i < size; i++) {
+        for (let j = 0; j < size; j++) {
+          const intersection = document.createElement('div');
+          intersection.classList.add('intersection');
+          intersection.addEventListener('click', () => makeMove(i, j));
+          board.appendChild(intersection);
+          intersections.push(intersection);
+        }
+      }
+
+      // 游戏逻辑 - 下棋
+      function makeMove(row, col) {
+        const index = row * size + col;
+        const intersection = intersections[index];
+
+        // 如果交叉点已经被占据，返回
+        if (intersection.children.length > 0) {
+          return;
+        }
+
+        // 下棋
+        const stone = document.createElement('div');
+        stone.classList.add('stone', currentPlayer);
+        intersection.appendChild(stone);
+
+        // 判断胜负
+        if (checkWin(row, col)) {
+          alert((currentPlayer === 'black' ? '黑子' : '白子') + '赢得了游戏！');
+          resetGame();
+          return;
+        }
+
+        // 切换玩家
+        currentPlayer = currentPlayer === 'black' ? 'white' : 'black';
+        nextMove.textContent = '下一步：' + (currentPlayer === 'black' ? '黑子' : '白子');
+      }
+
+      // 游戏逻辑 - 判断胜负
+      function checkWin(row, col) {
+        const directions = [
+          [0, 1], [1, 0], [1, 1], [-1, 1] // 横向、纵向、两个对角线方向
+        ];
+
+        for (const [dx, dy] of directions) {
+          let count = 1;
+
+          // 向正方向搜索
+          for (let step = 1; step <= 4; step++) {
+            const newRow = row + dx * step;
+            const newCol = col + dy * step;
+
+            if (newRow < 0 || newRow >= size || newCol < 0 || newCol >= size) {
+              break;
+            }
+
+            const index = newRow * size + newCol;
+            const cell = cells[index];
+
+            if (cell.textContent === currentPlayer) {
+              count++;
+            } else {
+              break;
+            }
+          }
+
+          // 向负方向搜索
+          for (let step = 1; step <= 4; step++) {
+            const newRow = row - dx * step;
+            const newCol = col - dy * step;
+
+            if (newRow < 0 || newRow >= size || newCol < 0 || newCol >= size) {
+              break;
+            }
+
+            const index = newRow * size + newCol;
+            const cell = cells[index];
+
+            if (cell.textContent === currentPlayer) {
+              count++;
+            } else {
+              break;
+            }
+          }
+
+          if (count >= 5) {
+            return true;
+          }
+        }
+
+        return false;
+      }
+
+      // 重置游戏
+      function resetGame() {
+        intersections.forEach(intersection => {
+          intersection.innerHTML = '';
+        });
+        currentPlayer = 'black';
+        nextMove.textContent = '下一步：黑子';
+      }
+    });
+
+  </script>
+</body>
+
+</html>
