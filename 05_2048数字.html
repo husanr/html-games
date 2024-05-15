@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>2048 数字游戏</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+    .game-container {
+      margin-top: 50px;
+    }
+    .game-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-gap: 10px;
+      width: 400px;
+      margin: 0 auto;
+    }
+    .grid-cell {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 30px;
+      font-weight: 600;
+      width: 90px;
+      height: 90px;
+      background-color: #eee;
+      border-radius: 5px;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    }
+    .grid-cell[data-number="2"] {
+      color: #6c5f56;
+      background-color: #ebdcd2;
+    }
+    .grid-cell[data-number="4"] {
+      color: #6b6058;
+      background-color: #e8d5b7;
+    }
+    .grid-cell[data-number="8"] {
+      color: #fff;
+      background-color: #eda774;
+    }
+    .grid-cell[data-number="16"] {
+      color: #fff;
+      background-color: #f5875b;
+    }
+    .grid-cell[data-number="32"] {
+      color: #fff;
+      background-color: #f36e53;
+    }
+    .grid-cell[data-number="64"] {
+      color: #fff;
+      background-color: #ebc46f;
+    }
+    .grid-cell[data-number="128"] {
+      color: #fff;
+      background-color: #6b90b5;
+    }
+    .grid-cell[data-number="256"] {
+      color: #fff;
+      background-color: #4a738e;
+    }
+    .grid-cell[data-number="512"] {
+      color: #fff;
+      background-color: #2e5170;
+    }
+    .grid-cell[data-number="1024"] {
+      color: #fff;
+      background-color: #16364b;
+    }
+    .grid-cell[data-number="2048"] {
+      color: #fff;
+      background-color: #011426;
+    }
+  </style>
+</head>
+<body>
+  <h1>2048 数字游戏</h1>
+  <div class="game-container">
+    <div class="game-grid"></div>
+  </div>
+
+  <script>
+    // 创建游戏格子数组
+    var grid = new Array(4);
+    for (var i = 0; i < grid.length; i++) {
+      grid[i] = new Array(4).fill(0);
+    }
+
+    // 随机生成一个数字 2 或 4
+    function generateRandomNumber() {
+      return Math.random() < 0.9 ? 2 : 4;
+    }
+
+    // 在空闲的格子中随机选择一个格子
+    function getRandomEmptyCell() {
+      var emptyCells = [];
+      for (var i = 0; i < grid.length; i++) {
+        for (var j = 0; j < grid[i].length; j++) {
+          if (grid[i][j] === 0) {
+            emptyCells.push({ row: i, col: j });
+          }
+        }
+      }
+      if (emptyCells.length === 0) {
+        return null;
+      }
+      return emptyCells[Math.floor(Math.random() * emptyCells.length)];
+    }
+
+    // 在随机格子中生成一个随机数字
+    function generateRandomTile() {
+      var emptyCell = getRandomEmptyCell();
+      if (emptyCell !== null) {
+        var number = generateRandomNumber();
+        grid[emptyCell.row][emptyCell.col] = number;
+      }
+    }
+
+    // 更新游戏界面
+    function updateUI() {
+      var gameGrid = document.querySelector('.game-grid');
+      gameGrid.innerHTML = '';
+      for (var i = 0; i < grid.length; i++) {
+        for (var j = 0; j < grid[i].length; j++) {
+          var cell = document.createElement('div');
+          cell.className = 'grid-cell';
+          cell.textContent = grid[i][j] !== 0 ? grid[i][j] : '';
+          cell.setAttribute('data-number', grid[i][j]);
+          gameGrid.appendChild(cell);
+        }
+      }
+    }
+
+    // 处理按键事件
+    function handleKeyPress(event) {
+      var keyPressed = event.key;
+      var moved = false;
+
+      switch (keyPressed) {
+        case 'ArrowUp':
+          moved = moveUp();
+          break;
+        case 'ArrowDown':
+          moved = moveDown();
+          break;
+        case 'ArrowLeft':
+          moved = moveLeft();
+          break;
+        case 'ArrowRight':
+          moved = moveRight();
+          break;
+      }
+
+      if (moved) {
+        generateRandomTile();
+        updateUI();
+      }
+    }
+
+    // 移动格子向上
+    function moveUp() {
+      var moved = false;
+      for (var j = 0; j < grid[0].length; j++) {
+        for (var i = 1; i < grid.length; i++) {
+          if (grid[i][j] !== 0) {
+            for (var k = i; k > 0; k--) {
+              if (grid[k - 1][j] === 0 || grid[k - 1][j] === grid[k][j]) {
+                grid[k - 1][j] += grid[k][j];
+                grid[k][j] = 0;
+                moved = true;
+              }
+            }
+          }
+        }
+      }
+      return moved;
+    }
+
+    // 移动格子向下
+    function moveDown() {
+      var moved = false;
+      for (var j = 0; j < grid[0].length; j++) {
+        for (var i = grid.length - 2; i >= 0; i--) {
+          if (grid[i][j] !== 0) {
+            for (var k = i; k < grid.length - 1; k++) {
+              if (grid[k + 1][j] === 0 || grid[k + 1][j] === grid[k][j]) {
+                grid[k + 1][j] += grid[k][j];
+                grid[k][j] = 0;
+                moved = true;
+              }
+            }
+          }
+        }
+      }
+      return moved;
+    }
+
+    // 移动格子向左
+    function moveLeft() {
+      var moved = false;
+      for (var i = 0; i < grid.length; i++) {
+        for (var j = 1; j < grid[i].length; j++) {
+          if (grid[i][j] !== 0) {
+            for (var k = j; k > 0; k--) {
+              if (grid[i][k - 1] === 0 || grid[i][k - 1] === grid[i][k]) {
+                grid[i][k - 1] += grid[i][k];
+                grid[i][k] = 0;
+                moved = true;
+              }
+            }
+          }
+        }
+      }
+      return moved;
+    }
+
+    // 移动格子向右
+    function moveRight() {
+      var moved = false;
+      for (var i = 0; i < grid.length; i++) {
+        for (var j = grid[i].length - 2; j >= 0; j--) {
+          if (grid[i][j] !== 0) {
+            for (var k = j; k < grid[i].length - 1; k++) {
+              if (grid[i][k + 1] === 0 || grid[i][k + 1] === grid[i][k]) {
+                grid[i][k + 1] += grid[i][k];
+                grid[i][k] = 0;
+                moved = true;
+              }
+            }
+          }
+        }
+      }
+      return moved;
+    }
+
+    // 初始化游戏
+    function initGame() {
+      generateRandomTile();
+      generateRandomTile();
+      updateUI();
+      document.addEventListener('keydown', handleKeyPress);
+    }
+
+    // 启动游戏
+    initGame();
+  </script>
+</body>
+</html>
